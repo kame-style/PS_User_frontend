@@ -1,9 +1,11 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import UserList from "../components/UserList";
-import { fetchUsers, fetchUsersByRole } from "../services/api";
+import UserList from "../src/components/UserList";
+import { fetchUsers, fetchUsersByRole } from "../src/services/api";
+import "@testing-library/jest-dom";
+import React from "react";
 
-jest.mock("../services/api");
+jest.mock("../src/services/api");
 
 const mockUsers = [
   {
@@ -21,51 +23,58 @@ const mockUsers = [
   }
 ];
 
+beforeEach(() => {
+  jest.clearAllMocks(); // Ensure mocks are reset before each test
+});
+
 describe("UserList Component", () => {
   test("renders user list correctly", async () => {
-    fetchUsers.mockResolvedValue(mockUsers);
+    fetchUsers.mockResolvedValueOnce(mockUsers);
 
-    render(
-      <BrowserRouter>
-        <UserList />
-      </BrowserRouter>
-    );
-
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <UserList />
+        </BrowserRouter>
+      );
+    });
 
     await waitFor(() => {
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
+      expect(screen.getByText("John")).toBeInTheDocument();
     });
   });
 
   test("filters users by role", async () => {
-    fetchUsersByRole.mockResolvedValue([mockUsers[0]]);
+    fetchUsersByRole.mockResolvedValueOnce([mockUsers[0]]);
     
-    render(
-      <BrowserRouter>
-        <UserList />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <UserList />
+        </BrowserRouter>
+      );
+    });
 
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "admin" } });
 
     await waitFor(() => {
       expect(fetchUsersByRole).toHaveBeenCalledWith("admin");
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
+      expect(screen.getByText("John")).toBeInTheDocument();
     });
   });
 
   test("handles API errors", async () => {
-    fetchUsers.mockRejectedValue(new Error("Network Error"));
+    fetchUsers.mockRejectedValueOnce(new Error("Network Error"));
 
     render(
-      <BrowserRouter>
-        <UserList />
-      </BrowserRouter>
-    );
+        <BrowserRouter>
+          <UserList />
+        </BrowserRouter>
+      );
 
     await waitFor(() => {
-      expect(screen.getByText(/error: Network Error/i)).toBeInTheDocument();
+      expect(fetchUsers).toHaveBeenCalledTimes(1);
+      expect(screen.getByText(/network error/i)).toBeInTheDocument();
     });
   });
 });

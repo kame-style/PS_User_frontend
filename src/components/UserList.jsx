@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchUsers, fetchUsersByRole } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import React from "react";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -18,7 +19,6 @@ const UserList = () => {
         const data = role ? await fetchUsersByRole(role) : await fetchUsers();
         setUsers(data);
       } catch (err) {
-        console.error("User List Fetch Error:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -29,7 +29,7 @@ const UserList = () => {
   }, [role]);
 
   if (loading) return <p className="text-center">Loading...</p>;
-  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <>
@@ -63,7 +63,7 @@ const UserList = () => {
           </tr>
         </thead>
         <tbody>
-          {users.length > 0 ? (
+          {users?.length > 0 ? (
             users.map((user) => (
               
               <tr

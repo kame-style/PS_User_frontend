@@ -1,9 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { fetchUserById } from "../services/api";
-import UserDetailPage from "../pages/UserDetailPage";
+import { fetchUserById } from "../src/services/api";
+import UserDetailPage from "../src/pages/UserDetailPage";
+import "@testing-library/jest-dom";
+import React from "react";
 
-jest.mock("../services/api");
+jest.mock("../src/services/api");
 
 const mockUser = {
   id: 1,

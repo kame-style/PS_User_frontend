@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchUserById } from "../services/api";
+import React from "react";
 
 const UserDetailPage = () => {
   const { id } = useParams();
@@ -21,7 +22,6 @@ const UserDetailPage = () => {
 
         setUser(data);
       } catch (err) {
-        console.error("User Fetch Error:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
